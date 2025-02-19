@@ -623,7 +623,7 @@ impl State {
         let token_metadata = token.token_metadata();
     
         // Update state
-        self.tokens.insert(token_id, token);
+        self.tokens.insert(token_id, token.clone());
         self.icrc7_total_supply += 1;
         self.next_token_id += 1; // Increment token_id for the next mint
     
@@ -639,11 +639,11 @@ impl State {
             arg.memo,
         );
     
-        Ok(txn_id)
+        Ok(token.clone())
     }
 
     pub fn mint_batch_supplier(&mut self, caller: &Principal, args: MintBatchArgs) -> MintBatchResult {
-        let mut transaction_ids = Vec::new();
+        let mut token_ids = Vec::new();
         let fixed_count = 10; // Supplier logic: 10 tokens per bundle
     
         for _ in 0..args.bundle_size {
@@ -658,13 +658,13 @@ impl State {
                 };
     
                 // Call the `mint` function for each token
-                let txn_id = self.mint(caller, mint_arg)?;
-                transaction_ids.push(txn_id);
+                let token_id = self.mint(caller, mint_arg)?;
+                token_ids.push(token_id);
             }
         }
     
         // Return all transaction IDs as a successful batch result
-        Ok(transaction_ids)
+        Ok(token_ids)
     }
     
 
